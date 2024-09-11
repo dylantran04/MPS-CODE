@@ -1,0 +1,21 @@
+function deleteFilesAtSpecificTime() {
+  var folderId = '16Y3ZO3WGH0cvkrwR6v6RdWRY2q6YN8PE';
+  var folder = DriveApp.getFolderById(folderId);
+  var files = folder.getFiles();
+  
+  var now = new Date();
+  
+  var deleteTime = new Date();
+  deleteTime.setHours(21, 0, 0);
+  
+  if (now >= deleteTime) {
+    while (files.hasNext()) {
+      var file = files.next();
+      var fileDate = file.getDateCreated();
+      
+      if (fileDate < now) {
+        file.setTrashed(true);
+      }
+    }
+  }
+}
