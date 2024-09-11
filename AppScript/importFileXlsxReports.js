@@ -74,18 +74,13 @@ function importXLSXToAppSheet() {
       for (var i = 1; i < data.length; i++) {
         var row = data[i];
 
-        var taskRequestProduct = (typeof row[1] === 'string') ? row[1].trim() : '';
-        // var product = (typeof row[2] === 'string') ? row[2].trim() : '';
-        // var productName = (typeof row[3] === 'string') ? row[3].trim() : '';
-        // var productType = (typeof row[4] === 'string') ? row[4].trim() : '';
-        var description = (typeof row[5] === 'string') ? row[5].trim() : '';
-        var score = (typeof row[10] === 'number') ? row[10] : Number(row[10]);
-        // var startTime = new Date(row[14]); 
-        // var endTime = new Date(row[15]); 
+        var taskRequestProduct = row[0] ? row[0].toString().trim() : '';
+        var description = row[1] ? row[1].toString().trim() : '';
+        var reportsCategory = row[2] ? row[2].toString().trim() : '';
+        var healthCheckScore = row[3] ? row[3].toString().trim() : '';
+        var startTime = (row[4] instanceof Date) ? row[4].toISOString() : '';
+        var endTime = (row[5] instanceof Date) ? row[5].toISOString() : '';
 
-        // var service = (typeof row[16] === 'string') ? row[16].trim() : '';
-        // var serviceDelivery = (typeof row[17] === 'string') ? row[17].trim() : '';
-        // var taskRequest = (typeof row[18] === 'string') ? row[18].trim() : '';
 
         if (!taskRequestProduct) {
           Logger.log('Dữ liệu không hợp lệ tại hàng ' + (i+1) + ': TASK REQUEST PRODUCT không được để trống.');
@@ -100,16 +95,11 @@ function importXLSXToAppSheet() {
           "Rows": [
             {
               "TASK REQUEST PRODUCT": taskRequestProduct,
-              // "PRODUCT": product,
-              // "PRODUCT NAME": productName,
-              // "PRODUCT TYPE": productType,
               "DESCRIPTION": description,
-              "SCORE": score,
-              // "SERVICE": service,
-              // "SERVICE DELIVERY": serviceDelivery,
-              "FILE CSV": fileName,
-              // "START TIME": startTime,
-              // "END TIME": endTime
+              "REPORT CATEGORY": reportsCategory,
+              "HEALTH CHECK SCORE": healthCheckScore,
+              "STARTTIME": startTime,
+              "ENDTIME": endTime
             }
           ]
         };
