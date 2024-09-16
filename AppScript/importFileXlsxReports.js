@@ -1,39 +1,13 @@
 var XLSX = {};
-
-function importXLSXToAppSheet() {
-  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('TASK REQUEST PRODUCT');
-  var lastRow = sheet.getLastRow();
-  Logger.log('Hàng cuối cùng: ' + lastRow);
-
-  if (lastRow === 0) {
-    Logger.log('Không có dữ liệu trong bảng.');
-    return;
+//FILE REPORT XLSX
+//idapp 43704351-3fa5-4dac-8f80-9c2a55a7d5da
+// key V2-YXz9z-peiTp-blDqN-DtkZ5-dH0fX-3YssU-8x0ZU-c8vqG
+function importXLSXToAppSheet(fileName) {
+  Logger.log("Tên file nhận được từ cột FILE CSV: " + fileName);
+  if (fileName.startsWith('FILE REPORT XLSX/')) {
+    fileName = fileName.replace('FILE REPORT XLSX/', '');
   }
-
-  var fileFound = false;
-  var fileName = '';
-
-  for (var rowIndex = 1; rowIndex <= lastRow; rowIndex++) {
-    var cellValue = sheet.getRange(rowIndex, 15).getValue();
-    if (cellValue && cellValue.endsWith('.xlsx')) {
-      fileName = cellValue;
-      fileFound = true;
-      Logger.log('Tên file tìm thấy: ' + fileName);
-      break;
-    }
-  }
-
-  if (!fileFound) {
-    Logger.log('Không tìm thấy file .xlsx trong cột 15.');
-    return;
-  }
-
-  if (fileName.startsWith('FILE CSV/')) {
-    fileName = fileName.replace('FILE CSV/', '');
-  }
-
   Logger.log('Tên file sau khi loại bỏ đường dẫn: ' + fileName);
-
   var folderId = '16Y3ZO3WGH0cvkrwR6v6RdWRY2q6YN8PE';
   var folder = DriveApp.getFolderById(folderId);
   var files = folder.getFilesByName(fileName);
@@ -42,13 +16,7 @@ function importXLSXToAppSheet() {
     var file = files.next();
     Logger.log('Đã tìm thấy file: ' + file.getName());
 
-    var blob = file.getBlob();
-    
-    var newSpreadsheet = SpreadsheetApp.create(fileName + ' - Copy');
-    var newSheet = newSpreadsheet.getActiveSheet();
-    
     var fileId = file.getId();
-    var fileUrl = 'https://www.googleapis.com/drive/v3/files/' + fileId + '/copy';
     var options = {
       'method': 'POST',
       'headers': {
@@ -60,8 +28,9 @@ function importXLSXToAppSheet() {
         'mimeType': MimeType.GOOGLE_SHEETS
       })
     };
-    
+
     try {
+      var fileUrl = 'https://www.googleapis.com/drive/v3/files/' + fileId + '/copy';
       var response = UrlFetchApp.fetch(fileUrl, options);
       var jsonResponse = JSON.parse(response.getContentText());
       var newFileId = jsonResponse.id;
@@ -73,7 +42,6 @@ function importXLSXToAppSheet() {
 
       for (var i = 1; i < data.length; i++) {
         var row = data[i];
-
         var taskRequestProduct = row[0] ? row[0].toString().trim() : '';
         var description = row[1] ? row[1].toString().trim() : '';
         var reportsCategory = row[2] ? row[2].toString().trim() : '';
@@ -81,9 +49,8 @@ function importXLSXToAppSheet() {
         var startTime = (row[4] instanceof Date) ? row[4].toISOString() : '';
         var endTime = (row[5] instanceof Date) ? row[5].toISOString() : '';
 
-
         if (!taskRequestProduct) {
-          Logger.log('Dữ liệu không hợp lệ tại hàng ' + (i+1) + ': TASK REQUEST PRODUCT không được để trống.');
+          Logger.log('Dữ liệu không hợp lệ tại hàng ' + (i + 1) + ': TASK REQUEST PRODUCT không được để trống.');
           continue;
         }
 
@@ -92,24 +59,22 @@ function importXLSXToAppSheet() {
           "Properties": {
             "Locale": "en-US"
           },
-          "Rows": [
-            {
-              "TASK REQUEST PRODUCT": taskRequestProduct,
-              "DESCRIPTION": description,
-              "REPORT CATEGORY": reportsCategory,
-              "HEALTH CHECK SCORE": healthCheckScore,
-              "STARTTIME": startTime,
-              "ENDTIME": endTime
-            }
-          ]
+          "Rows": [{
+            "TASK REQUEST PRODUCT": taskRequestProduct,
+            "DESCRIPTION": description,
+            "REPORT CATEGORY": reportsCategory,
+            "HEALTH CHECK SCORE": healthCheckScore,
+            "STARTTIME": startTime,
+            "ENDTIME": endTime
+          }]
         };
 
-        var apiUrl = "https://api.appsheet.com/api/v2/apps/a8cc83c0-c3bf-45e3-8739-8621466bf243/tables/REPORTS/Action";
+        var apiUrl = "https://api.appsheet.com/api/v2/apps/43704351-3fa5-4dac-8f80-9c2a55a7d5da/tables/REPORTS/Action";
         var apiOptions = {
           "method": "post",
           "contentType": "application/json",
           "headers": {
-            "ApplicationAccessKey": "V2-AhEY7-x4cEJ-7Sjqa-srG7U-z7lqQ-hu2S4-EE48p-1aM36"
+            "ApplicationAccessKey": "V2-YXz9z-peiTp-blDqN-DtkZ5-dH0fX-3YssU-8x0ZU-c8vqG"
           },
           "payload": JSON.stringify(payload),
           "muteHttpExceptions": true
@@ -122,10 +87,9 @@ function importXLSXToAppSheet() {
           Logger.log('Lỗi khi gửi yêu cầu: ' + e.message);
         }
       }
-
       DriveApp.getFileById(newFileId).setTrashed(true);
     } catch (e) {
-      Logger.log('Lỗi khi chuyển đổi và xử lý file: ' + e.message);
+      Logger.log('Lỗi khi xử lý file: ' + e.message);
     }
   } else {
     Logger.log("Không tìm thấy file với tên: " + fileName);
